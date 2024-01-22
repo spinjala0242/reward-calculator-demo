@@ -1,0 +1,115 @@
+openapi: 3.0.1
+info:
+  title: Reward Calculator API
+  version: 1.0.0
+paths:
+  /reward/{userId}:
+    get:
+      tags:
+        - RewardCalculatorApi
+      summary: Get Reward Points
+      operationId: getRewardPoints
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: long
+          description: User ID for which reward points are requested
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                reward:
+                  month-1-reward-point: 0
+                  month-2-reward-point: 118
+                  month-3-reward-point: 504
+                  totalRewardPoints: 622
+                additionalProperty: "This is an additional property"
+              schema:
+                $ref: '#/components/schemas/RewardApiResponse'
+        '404':
+          description: Not FOund
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /transaction/{userId}:
+    post:
+      tags:
+        - RewardCalculatorApi
+      summary: Create Transaction
+      operationId: createTransaction
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: long
+          description: User ID for which the transaction is added
+      requestBody:
+        description: Transaction details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionApiResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    TransactionRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Transaction amount
+        date:
+          type: string
+    TransactionApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: "Transaction is created with amount : 50.0 for user : 123"
+    RewardApiResponse:
+      type: object
+      properties:
+        reward:
+          type: object
+          description: "Reward details"
+    Error:
+      type: object
+      required:
+        - status
+        - code
+      properties:
+        status:
+          type: integer
+          description: "original HTTP error code, should be consistent with the response HTTP code"
+          minimum: 100
+          maximum: 599
+          example: 400
+        code:
+          type: string
+          description: "The error code, in screaming snake case"
+          pattern: "^[A-Z]+(_[A-Z]+)*$"
+          example: 'BAD_REQUEST'
+        message:
+          type: string
+          description: "Descriptive error message for error"
+          example: 'field is invalid.'
